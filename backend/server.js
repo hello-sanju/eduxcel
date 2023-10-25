@@ -77,69 +77,68 @@ passport.deserializeUser(User.deserializeUser());
 
 // Google OAuth2 routes
 passport.use(
-  new GoogleStrategy(
-    {
-      clientID: '325528469583-a46gmh0imv5fm4d0v13emjdga3n2b2pn.apps.googleusercontent.com',
+  new GoogleStrategy({
+   clientID: '325528469583-a46gmh0imv5fm4d0v13emjdga3n2b2pn.apps.googleusercontent.com',
       clientSecret: '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',
       callbackURL: 'https://edu-backend-py90.onrender.com/auth/google/callback',
-    },
-    async (accessToken, refreshToken, profile, done) => {
-      try {
-        const existingUser = await User.findOne({ googleId: profile.id });
+  },
+  async (accessToken, refreshToken, profile, done) => {
+    try {
+      const existingUser = await User.findOne({ googleId: profile.id });
 
-        if (existingUser) {
-          // Update the user's email and username if they have changed on Google
-          if (existingUser.email !== profile.emails[0].value) {
-            existingUser.email = profile.emails[0].value;
-          }
-          if (existingUser.username !== profile.displayName) {
-            existingUser.username = profile.displayName;
-          }
-
-          await existingUser.save();
-
-          // Find or create the user profile
-          let userProfile = await UserProfile.findOne({ user: existingUser._id });
-
-          if (!userProfile) {
-            userProfile = new UserProfile({
-              user: existingUser._id,
-              email: profile.emails[0].value,
-              username: profile.displayName,
-              // Add other profile properties as needed
-            });
-          }
-
-          await userProfile.save();
-
-          return done(null, existingUser);
+      if (existingUser) {
+        // Update the user's email and username if they have changed on Google
+        if (existingUser.email !== profile.emails[0].value) {
+          existingUser.email = profile.emails[0].value;
+        }
+        if (existingUser.username !== profile.displayName) {
+          existingUser.username = profile.displayName;
         }
 
-        const newUser = new User({
-          googleId: profile.id,
-          email: profile.emails[0].value,
-          username: profile.displayName,
-          // Add other user properties as needed
-        });
+        await existingUser.save();
 
-        await newUser.save();
+        // Find or create the user profile
+        let userProfile = await UserProfile.findOne({ user: existingUser._id });
 
-        const newProfile = new UserProfile({
-          user: newUser._id,
-          email: profile.emails[0].value,
-          username: profile.displayName,
-          // Add other profile properties as needed
-        });
+        if (!userProfile) {
+          userProfile = new UserProfile({
+            user: existingUser._id,
+            email: profile.emails[0].value,
+            username: profile.displayName,
+            // Add other profile properties as needed
+          });
+        }
 
-        await newProfile.save();
+        await userProfile.save();
 
-        done(null, newUser);
-      } catch (error) {
-        done(error, null);
+        return done(null, existingUser);
       }
+
+      const newUser = new User({
+        googleId: profile.id,
+        email: profile.emails[0].value,
+        username: profile.displayName,
+        // Add other user properties as needed
+      });
+
+      await newUser.save();
+
+      const newProfile = new UserProfile({
+        user: newUser._id,
+        email: profile.emails[0].value,
+        username: profile.displayName,
+        // Add other profile properties as needed
+      });
+
+      await newProfile.save();
+
+      done(null, newUser);
+    } catch (error) {
+      done(error, null);
     }
-  )
+  })
 );
+
 
 
 const allowedOrigins = [
@@ -325,10 +324,6 @@ app.get(
     try {
       // Check if the user exists or create a new user (similar to your local authentication)
       const user = await User.findOne({ googleId: req.user.googleId });
-catch (error) {
-      console.error('Google OAuth callback error:', error);
-      res.redirect('/signin?error=google-oauth-error');
-    }
       if (!user) {
         const newUser = new User({
           username: req.user.displayName,
@@ -347,7 +342,7 @@ catch (error) {
       }
 
       // Generate a JWT token for the user
-      const token = jwt.sign({ userId: user._id }, 'fRwD8ZcX#k5H*J!yN&2G@pQbS9v6E$tA', { expiresIn: '1h' });
+      const token = jwt.sign({ userId: user._id }, 'your-secret-key', { expiresIn: '1h' });
 
       // Redirect or respond with the token as needed
       res.redirect(`https://eduxcel.vercel.app/profile?token=${token}`);
@@ -357,7 +352,6 @@ catch (error) {
     }
   }
 );
-
 
 // Serve the React app in production
 if (process.env.NODE_ENV === 'production') {
