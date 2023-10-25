@@ -1,12 +1,13 @@
 const express = require('express');
 const cors = require('cors');
-const router = express.Router();
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const path = require('path');
-const session = require('express-session');
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const session = require('express-session'); 
+const passport = require('passport'); 
+const axios = require('axios'); 
+
+dotenv.config();
 const signupRouter = require('./routes/signup');
 const signinRouter = require('./routes/signin');
 const authMiddleware = require('./middleware/authMiddleware');
@@ -14,24 +15,43 @@ const profileRouter = require('./routes/profile');
 const coursesRouter = require('./routes/courses');
 const forgotPasswordRouter = require('./routes/forgotPassword');
 const resetPasswordRouter = require('./routes/resetPassword');
-const User = require('./models/User'); // Import the User model
-const UserProfile = require('./models/UserProfile'); // Import the UserProfile model
-const jwt = require('jsonwebtoken'); // Import the jsonwebtoken package
-
-dotenv.config();
 const app = express();
 
-// Configure sessions before Passport middleware
+const PORT = process.env.PORT || 5000;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+
 app.use(
   session({
     secret: 'fRwD8ZcX#k5H*J!yN&2G@pQbS9v6E$tA',
     resave: false,
     saveUninitialized: false,
+    // Add other session configuration options as needed
   })
 );
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+const allowedOrigins = [
+'https://eduxcel.vercel.app',
+  'http://localhost:5173',
+  // Add more domains if needed
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (allowedOrigins.includes(origin) || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+}));
+app.use(express.json());
+app.use('/uploads', express.static('uploads'));
+
+app.use(express.static(path.join(__dirname, 'client/build')));
 
 // Connect to MongoDB using the MONGODB_URI_MYDB environment variable
 mongoose.connect(process.env.MONGODB_URI_MYDB, {
@@ -45,6 +65,13 @@ mongoose.connection.on('connected', () => {
 
 // Define your MongoDB collections (models)
 const Course = require('./models/Course');
+const User = require('./models/User');
+passport.use(User.createStrategy());
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+const UserProfile = require('./models/UserProfile');
+
 const Feedback = mongoose.model('feedback', {
   name: String,
   email: String,
@@ -69,47 +96,14 @@ const Working = mongoose.model('working', {
   videoURL: [String],
 });
 
-// Define Passport strategies
-passport.use(User.createStrategy());
-
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
-
-
-
-const allowedOrigins = [
-  'https://eduxcel.vercel.app',
-  'http://localhost:5173',
-  // Add more domains if needed
-];
-
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (allowedOrigins.includes(origin) || !origin) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-  })
-);
-
-app.use(express.json());
-app.use('/uploads', express.static('uploads'));
-
-app.use(express.static(path.join(__dirname, 'client/build')));
-
 // Define your routes and APIs here
 app.use('/api/signup', signupRouter);
-app.use('/api/profile', authMiddleware);
 app.use('/api/signin', signinRouter);
-
+app.use('/api/profile', authMiddleware);
 app.use('/api/profile', profileRouter);
 app.use('/api/courses', coursesRouter);
 app.use('/api/forgotpassword', forgotPasswordRouter);
 app.use('/api/reset-password', resetPasswordRouter);
-
 app.put('/api/profile', authMiddleware, async (req, res) => {
   try {
     console.log('Received a request to update user profile');
@@ -143,6 +137,9 @@ app.get('/uploads/:filename', (req, res) => {
   res.setHeader('Cache-Control', 'no-store'); // Disable caching
   res.sendFile(path.join(__dirname, 'uploads', req.params.filename));
 });
+
+
+
 app.get('/api/:collection', async (req, res) => {
   const collection = req.params.collection;
   try {
@@ -163,6 +160,31 @@ app.get('/api/:collection', async (req, res) => {
   } catch (error) {
     console.error(`Error fetching data from ${collection} collection:`, error);
     res.status(500).json({ error: `Error fetching data from ${collection} collection` });
+  }
+});
+
+// ChatGPT API endpoint
+app.post('/api/chat', async (req, res) => {
+  const { message } = req.body;
+  try {
+    const response = await axios.post(
+      'https://api.openai.com/v1/engines/davinci-codex/completions',
+      {
+        prompt: `You are a helpful assistant: ${message}`,
+        max_tokens: 150,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+      }
+    );
+
+    res.json({ reply: response.data.choices[0].text });
+  } catch (error) {
+    console.error('Error generating chat response:', error);
+    res.status(500).json({ error: 'Error generating chat response' });
   }
 });
 app.get('/api/courses/:title', async (req, res) => {
@@ -249,35 +271,19 @@ app.get('/api/courses/:title/:module', async (req, res) => {
 });
 
 
-// Serve the React app in production
-if (process.env.NODE_ENV === 'production') {
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
-  });
-}
 
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
 });
-
-// Listen for MongoDB collection events
-mongoose.connection.on('collection', (collectionName) => {
-  console.log(`Collection ${collectionName} changed.`);
-});
-
-// Serve the React app in production
-if (process.env.NODE_ENV === 'production') {
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
-  });
-}
-
-const PORT = process.env.PORT || 5000;
 app.get('/', (req, res) => {
   res.send('Welcome to My API');
 });
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+// Listen for MongoDB collection events
+mongoose.connection.on('collection', (collectionName) => {
+  console.log(`Collection ${collectionName} changed.`);
+})
