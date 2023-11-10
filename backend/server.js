@@ -81,7 +81,7 @@ passport.use(
     {
       clientID: '325528469583-a46gmh0imv5fm4d0v13emjdga3n2b2pn.apps.googleusercontent.com',
       clientSecret: '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',
-      callbackURL: 'https://edu-backend-py90.onrender.com/auth/google/callback',
+      callbackURL: 'https://eduxcel-backend.onrender.com/auth/google/callback',
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
