@@ -313,7 +313,7 @@ app.get('/api/courses/:title/:module', async (req, res) => {
   }
 });
 // Google OAuth2 routes
-app.get('/auth/googleToken', passport.authenticate('google', { scope: ['profile', 'email'] }));
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 
 app.get(
