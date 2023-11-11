@@ -72,8 +72,20 @@ const Working = mongoose.model('working', {
 // Define Passport strategies
 passport.use(User.createStrategy());
 
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (error) {
+    done(error, null);
+  }
+});
+
+
 
 // Google OAuth2 routes
 passport.use(
@@ -340,21 +352,31 @@ app.get(
           user: newUser._id,
           email: newUser.email, // Use the email from the newly created user
           username: newUser.username,
+          // Add other profile properties as needed
         });
         await newUserProfile.save();
       }
 
-      // Generate a JWT token for the user
-      const token = jwt.sign({ userId: user._id }, 'fRwD8ZcX#k5H*J!yN&2G@pQbS9v6E$tA', { expiresIn: '1h' });
+      // Log in the user
+      req.login(existingUser || newUser, (loginErr) => {
+        if (loginErr) {
+          console.error('User login error:', loginErr);
+          return res.redirect('/signin');
+        }
 
-      // Redirect or respond with the token as needed
-      res.redirect(`https://eduxcel.vercel.app/profile?token=${token}`);
+        // Generate a JWT token for the user
+        const token = jwt.sign({ userId: user._id }, 'fRwD8ZcX#k5H*J!yN&2G@pQbS9v6E$tA', { expiresIn: '1h' });
+
+        // Redirect or respond with the token as needed
+        res.redirect(`https://eduxcel.vercel.app/profile?token=${token}`);
+      });
     } catch (error) {
       console.error('Google OAuth callback error:', error);
       res.redirect('/signin');
     }
   }
 );
+
 
 // Serve the React app in production
 if (process.env.NODE_ENV === 'production') {
