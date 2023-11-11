@@ -16,7 +16,7 @@ const forgotPasswordRouter = require('./routes/forgotPassword');
 const resetPasswordRouter = require('./routes/resetPassword');
 const User = require('./models/User'); // Import the User model
 const UserProfile = require('./models/UserProfile'); // Import the UserProfile model
-const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken'); // Import the jsonwebtoken package
 
 dotenv.config();
 const app = express();
@@ -81,7 +81,7 @@ passport.use(
     {
       clientID: '325528469583-a46gmh0imv5fm4d0v13emjdga3n2b2pn.apps.googleusercontent.com',
       clientSecret: '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',
-      callbackURL: 'https://eduxcel-backend.onrender.com/auth/google/callback',
+      callbackURL: 'https://edu-backend-py90.onrender.com/auth/google/callback',
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -313,8 +313,10 @@ app.get('/api/courses/:title/:module', async (req, res) => {
   }
 });
 // Google OAuth2 routes
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-
+app.get(
+  '/auth/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
 
 app.get(
   '/auth/google/callback',
@@ -323,7 +325,10 @@ app.get(
     try {
       // Check if the user exists or create a new user (similar to your local authentication)
       const user = await User.findOne({ googleId: req.user.googleId });
-
+catch (error) {
+      console.error('Google OAuth callback error:', error);
+      res.redirect('/signin?error=google-oauth-error');
+    }
       if (!user) {
         const newUser = new User({
           username: req.user.displayName,
