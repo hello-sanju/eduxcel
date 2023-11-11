@@ -333,38 +333,32 @@ app.get(
   passport.authenticate('google', { failureRedirect: '/signin' }),
   async (req, res) => {
     try {
-      // The user is authenticated at this point
+      // Check if the user is authenticated
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: 'Authentication failed' });
+      }
+
+      // Get the authenticated user
       const user = req.user;
 
-      // Check if the user exists in your database
-      let existingUser = await User.findOne({ googleId: user.googleId });
+      // Find or create the user profile
+      let userProfile = await UserProfile.findOne({ user: user._id });
 
-      if (!existingUser) {
-        // If the user doesn't exist, create a new user
-        existingUser = new User({
-          username: user.displayName,
-          email: user.emails[0].value,
-          googleId: user.googleId,
+      if (!userProfile) {
+        userProfile = new UserProfile({
+          user: user._id,
+          email: user.email,
+          username: user.username,
+          // Add other profile properties as needed
         });
 
-        // Save the new user to the database
-        await existingUser.save();
-
-        // Create a user profile for the new user
-        const newUserProfile = new UserProfile({
-          user: existingUser._id,
-          email: existingUser.email,
-          username: existingUser.username,
-        });
-
-        // Save the new user profile to the database
-        await newUserProfile.save();
+        await userProfile.save();
       }
 
       // Generate a JWT token for the user
-      const token = jwt.sign({ userId: existingUser._id }, 'fRwD8ZcX#k5H*J!yN&2G@pQbS9v6E$tA', { expiresIn: '1h' });
+      const token = jwt.sign({ userId: user._id }, 'fRwD8ZcX#k5H*J!yN&2G@pQbS9v6E$tA', { expiresIn: '1h' });
 
-      // Redirect the user to the profile page with the token
+      // Redirect to the profile page with the token as a query parameter
       res.redirect(`https://eduxcel.vercel.app/profile?token=${token}`);
     } catch (error) {
       console.error('Google OAuth callback error:', error);
