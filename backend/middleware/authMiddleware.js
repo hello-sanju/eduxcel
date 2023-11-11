@@ -54,4 +54,3 @@ async function verifyGoogleToken(token, clientId) {
 }
 
 module.exports = authMiddleware;
-
