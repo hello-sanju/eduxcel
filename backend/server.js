@@ -72,20 +72,8 @@ const Working = mongoose.model('working', {
 // Define Passport strategies
 passport.use(User.createStrategy());
 
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
-
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await User.findById(id);
-    done(null, user);
-  } catch (error) {
-    done(error, null);
-  }
-});
-
-
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 // Google OAuth2 routes
 passport.use(
@@ -333,39 +321,38 @@ app.get(
   passport.authenticate('google', { failureRedirect: '/signin' }),
   async (req, res) => {
     try {
-      // Check if the user is authenticated
-      if (!req.isAuthenticated()) {
-        return res.status(401).json({ error: 'Authentication failed' });
-      }
+      // Check if the user exists or create a new user (similar to your local authentication)
+      const user = await User.findOne({ googleId: req.user.googleId });
 
-      // Get the authenticated user
-      const user = req.user;
-
-      // Find or create the user profile
-      let userProfile = await UserProfile.findOne({ user: user._id });
-
-      if (!userProfile) {
-        userProfile = new UserProfile({
-          user: user._id,
-          email: user.email,
-          username: user.username,
-          // Add other profile properties as needed
+      if (!user) {
+        const newUser = new User({
+          username: req.user.displayName,
+          email: req.user.emails[0].value,
+          googleId: req.user.googleId,
         });
+        await newUser.save();
 
-        await userProfile.save();
+        // Create a user profile for the new user
+        const newUserProfile = new UserProfile({
+          user: newUser._id,
+          username: newUser.username,
+          email: newUser.email, // Use the email from the newly created user
+        });
+        await newUserProfile.save();
       }
 
       // Generate a JWT token for the user
       const token = jwt.sign({ userId: user._id }, 'fRwD8ZcX#k5H*J!yN&2G@pQbS9v6E$tA', { expiresIn: '1h' });
 
-      // Redirect to the profile page with the token as a query parameter
-      return res.redirect(`https://eduxcel.vercel.app/profile?token=${token}`);
+      // Redirect or respond with the token as needed
+      res.redirect(`https://eduxcel.vercel.app/profile?token=${token}`);
     } catch (error) {
       console.error('Google OAuth callback error:', error);
-      return res.redirect('/signin');
+      res.redirect('/signin');
     }
   }
 );
+
 
 // Serve the React app in production
 if (process.env.NODE_ENV === 'production') {
