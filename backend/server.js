@@ -81,7 +81,7 @@ passport.use(
     {
       clientID: '325528469583-a46gmh0imv5fm4d0v13emjdga3n2b2pn.apps.googleusercontent.com',
       clientSecret: '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',
-      callbackURL: 'https://edu-backend-py90.onrender.com/auth/google/callback',
+      callbackURL: 'https://eduxcel-backend.onrender.com/auth/google/callback',
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -323,30 +323,32 @@ app.get(
   passport.authenticate('google', { failureRedirect: '/signin' }),
   async (req, res) => {
     try {
-      // Check if the user exists or create a new user (similar to your local authentication)
-      const user = await User.findOne({ googleId: req.user.googleId });
+      // Check if the user is authenticated
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: 'Authentication failed' });
+      }
 
-      if (!user) {
-        const newUser = new User({
-          username: req.user.displayName,
-          email: req.user.emails[0].value,
-          googleId: req.user.googleId,
-        });
-        await newUser.save();
+      // Get the authenticated user
+      const user = req.user;
 
-        // Create a user profile for the new user
-        const newUserProfile = new UserProfile({
-          user: newUser._id,
-          username: newUser.username,
-          email: newUser.email, // Use the email from the newly created user
+      // Find or create the user profile
+      let userProfile = await UserProfile.findOne({ user: user._id });
+
+      if (!userProfile) {
+        userProfile = new UserProfile({
+          user: user._id,
+          email: user.email,
+          username: user.username,
+          // Add other profile properties as needed
         });
-        await newUserProfile.save();
+
+        await userProfile.save();
       }
 
       // Generate a JWT token for the user
       const token = jwt.sign({ userId: user._id }, 'fRwD8ZcX#k5H*J!yN&2G@pQbS9v6E$tA', { expiresIn: '1h' });
 
-      // Redirect or respond with the token as needed
+      // Redirect to the profile page with the token as a query parameter
       res.redirect(`https://eduxcel.vercel.app/profile?token=${token}`);
     } catch (error) {
       console.error('Google OAuth callback error:', error);
