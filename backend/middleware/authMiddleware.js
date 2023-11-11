@@ -15,14 +15,15 @@ const authMiddleware = async (req, res, next) => {
       let decoded;
 
       if (token.startsWith('Bearer ')) {
-        // Manual sign-in using JWT
+        // Manual sign-in with JWT token
         const jwtToken = token.replace('Bearer ', '');
         decoded = jwt.verify(jwtToken, 'fRwD8ZcX#k5H*J!yN&2G@pQbS9v6E$tA');
       } else if (token.startsWith('GoogleToken ')) {
-        // Google sign-in
+        // Google sign-in with Google token
         const googleToken = token.replace('GoogleToken ', '');
         decoded = await verifyGoogleToken(googleToken, '325528469583-a46gmh0imv5fm4d0v13emjdga3n2b2pn.apps.googleusercontent.com');
       } else {
+        // Invalid token format
         return res.status(401).json({ error: 'Invalid token format' });
       }
 
