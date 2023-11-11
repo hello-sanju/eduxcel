@@ -51,27 +51,23 @@ router.get('/', authMiddleware, async (req, res) => {
 });
 
 // Update user profile route with file upload
-// Update user profile route with file upload
 router.put('/', authMiddleware, upload.single('profileImage'), async (req, res) => {
   try {
     console.log('Received a request to update user profile');
     console.log('User ID:', req.user._id);
     console.log('Request Body:', req.body);
 
-    const updatedFields = {
-      firstName: req.body.firstName || '',
-      lastName: req.body.lastName || '',
-      bio: req.body.bio || '',
-    };
-
-    if (req.file) {
-      updatedFields.profileImage = `uploads/${req.file.filename}`;
-    }
-
     const userProfile = await UserProfile.findOneAndUpdate(
       { user: req.user._id },
-      updatedFields,
-      { new: true }
+      {
+        firstName: req.body.firstName || '',
+        lastName: req.body.lastName || '',
+        bio: req.body.bio || '',
+        profileImage: req.uniqueFilename // Use the unique filename from the request object
+          ? `uploads/${req.uniqueFilename}` // Store the relative file path
+          : '', 
+      },
+      { new: true } // Use the { new: true } option to get the updated document
     );
 
     if (!userProfile) {
