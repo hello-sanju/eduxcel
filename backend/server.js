@@ -321,14 +321,17 @@ app.get(
   passport.authenticate('google', { failureRedirect: '/signin' }),
   async (req, res) => {
     try {
-      // Check if the user exists or create a new user (similar to your local authentication)
-      const user = await User.findOne({ googleId: req.user.googleId });
+      // If the user is authenticated, you can access their details from the request object
+      const user = req.user;
 
-      if (!user) {
+      // Check if the user exists or create a new user (similar to your local authentication)
+      const existingUser = await User.findOne({ googleId: user.googleId });
+
+      if (!existingUser) {
         const newUser = new User({
-          username: req.user.displayName,
-          email: req.user.emails[0].value,
-          googleId: req.user.googleId,
+          username: user.displayName,
+          email: user.emails[0].value,
+          googleId: user.googleId,
         });
         await newUser.save();
 
