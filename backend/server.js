@@ -333,50 +333,45 @@ app.get(
   passport.authenticate('google', { failureRedirect: '/signin' }),
   async (req, res) => {
     try {
-      // If the user is authenticated, you can access their details from the request object
+      // The user is authenticated at this point
       const user = req.user;
 
-      // Check if the user exists or create a new user (similar to your local authentication)
-      const existingUser = await User.findOne({ googleId: user.googleId });
+      // Check if the user exists in your database
+      let existingUser = await User.findOne({ googleId: user.googleId });
 
       if (!existingUser) {
-        const newUser = new User({
+        // If the user doesn't exist, create a new user
+        existingUser = new User({
           username: user.displayName,
           email: user.emails[0].value,
           googleId: user.googleId,
         });
-        await newUser.save();
+
+        // Save the new user to the database
+        await existingUser.save();
 
         // Create a user profile for the new user
         const newUserProfile = new UserProfile({
-          user: newUser._id,
-          email: newUser.email, // Use the email from the newly created user
-          username: newUser.username,
-          // Add other profile properties as needed
+          user: existingUser._id,
+          email: existingUser.email,
+          username: existingUser.username,
         });
+
+        // Save the new user profile to the database
         await newUserProfile.save();
       }
 
-      // Log in the user
-      req.login(existingUser || newUser, (loginErr) => {
-        if (loginErr) {
-          console.error('User login error:', loginErr);
-          return res.redirect('/signin');
-        }
+      // Generate a JWT token for the user
+      const token = jwt.sign({ userId: existingUser._id }, 'fRwD8ZcX#k5H*J!yN&2G@pQbS9v6E$tA', { expiresIn: '1h' });
 
-        // Generate a JWT token for the user
-        const token = jwt.sign({ userId: user._id }, 'fRwD8ZcX#k5H*J!yN&2G@pQbS9v6E$tA', { expiresIn: '1h' });
-
-        // Redirect or respond with the token as needed
-        res.redirect(`https://eduxcel.vercel.app/profile?token=${token}`);
-      });
+      // Redirect or respond with the token as needed
+      res.redirect(`https://eduxcel.vercel.app/profile?token=${token}`);
     } catch (error) {
       console.error('Google OAuth callback error:', error);
       res.redirect('/signin');
     }
   }
 );
-
 
 // Serve the React app in production
 if (process.env.NODE_ENV === 'production') {
