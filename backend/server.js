@@ -215,7 +215,7 @@ app.put('/api/profile', authMiddleware, async (req, res) => {
     res.status(500).json({ message: 'Error updating user profile' });
   }
 });
-s
+
 // Serve profile images with caching disabled
 app.get('/uploads/:filename', (req, res) => {
   res.setHeader('Cache-Control', 'no-store'); // Disable caching
