@@ -4,7 +4,7 @@ const { OAuth2Client } = require('google-auth-library');
 
 const authMiddleware = async (req, res, next) => {
   try {
-    const token = req.header('Authorization').replace('Bearer ', '');
+    const token = req.header('Authorization');
     console.log('Received token:', token);
 
     if (!token) {
