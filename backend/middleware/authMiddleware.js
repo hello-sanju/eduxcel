@@ -44,17 +44,4 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-// Function to verify Google token using Google's API
-async function verifyGoogleToken(token, clientId) {
-  const client = new OAuth2Client(clientId);
-
-  const ticket = await client.verifyIdToken({
-    idToken: token,
-    audience: clientId,
-  });
-
-  const payload = ticket.getPayload();
-  return payload;
-}
-
 module.exports = authMiddleware;
