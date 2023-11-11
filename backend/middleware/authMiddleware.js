@@ -14,7 +14,7 @@ const authMiddleware = async (req, res, next) => {
     try {
       let decoded;
 
-      // Check if it's a Google token
+      
       if (token.startsWith('GoogleToken ')) {
         const googleToken = token.replace('GoogleToken ', '');
         decoded = await verifyGoogleToken(googleToken, '325528469583-a46gmh0imv5fm4d0v13emjdga3n2b2pn.apps.googleusercontent.com');
