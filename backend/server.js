@@ -338,8 +338,8 @@ app.get(
         // Create a user profile for the new user
         const newUserProfile = new UserProfile({
           user: newUser._id,
-          username: newUser.username,
           email: newUser.email, // Use the email from the newly created user
+          username: newUser.username,
         });
         await newUserProfile.save();
       }
@@ -355,7 +355,6 @@ app.get(
     }
   }
 );
-
 
 // Serve the React app in production
 if (process.env.NODE_ENV === 'production') {
