@@ -325,10 +325,7 @@ app.get(
     try {
       // Check if the user exists or create a new user (similar to your local authentication)
       const user = await User.findOne({ googleId: req.user.googleId });
-catch (error) {
-      console.error('Google OAuth callback error:', error);
-      res.redirect('/signin?error=google-oauth-error');
-    }
+
       if (!user) {
         const newUser = new User({
           username: req.user.displayName,
@@ -357,7 +354,6 @@ catch (error) {
     }
   }
 );
-
 
 // Serve the React app in production
 if (process.env.NODE_ENV === 'production') {
