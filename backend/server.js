@@ -359,10 +359,10 @@ app.get(
       const token = jwt.sign({ userId: user._id }, 'fRwD8ZcX#k5H*J!yN&2G@pQbS9v6E$tA', { expiresIn: '1h' });
 
       // Redirect to the profile page with the token as a query parameter
-      res.redirect(`https://eduxcel.vercel.app/profile?token=${token}`);
+      return res.redirect(`https://eduxcel.vercel.app/profile?token=${token}`);
     } catch (error) {
       console.error('Google OAuth callback error:', error);
-      res.redirect('/signin');
+      return res.redirect('/signin');
     }
   }
 );
