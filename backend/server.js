@@ -323,8 +323,10 @@ app.get(
   passport.authenticate('google', { failureRedirect: '/signin' }),
   async (req, res) => {
     try {
+      console.log('Google OAuth callback initiated...');
       // Check if the user is authenticated
       if (!req.isAuthenticated()) {
+        console.log('Authentication failed...');
         return res.status(401).json({ error: 'Authentication failed' });
       }
 
@@ -343,10 +345,15 @@ app.get(
         });
 
         await userProfile.save();
+        console.log('User profile created:', userProfile);
+      } else {
+        console.log('User profile found:', userProfile);
       }
 
       // Generate a JWT token for the user
       const token = jwt.sign({ userId: user._id }, 'fRwD8ZcX#k5H*J!yN&2G@pQbS9v6E$tA', { expiresIn: '1h' });
+
+      console.log('JWT token generated:', token);
 
       // Redirect to the profile page with the token as a query parameter
       res.redirect(`https://eduxcel.vercel.app/profile?token=${token}`);
