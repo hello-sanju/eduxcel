@@ -59,4 +59,5 @@ async function verifyGoogleToken(token, clientId) {
   return payload;
 }
 
-module.exports = authMiddleware;
+module.exports = { authMiddleware, verifyGoogleToken };
+
