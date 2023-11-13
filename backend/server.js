@@ -355,12 +355,12 @@ app.get(
       }
 
       // Generate a JWT token for the user
-      const token = jwt.sign({ userId: user._id }, 'fRwD8ZcX#k5H*J!yN&2G@pQbS9v6E$tA', {
+      const token = jwt.sign({ userId: user._id }, 'your-secret-key', {
         expiresIn: '1h',
       });
 
-      // Send the token in the response
-      res.json({ token });
+      // Redirect to the frontend with the token in the URL
+      res.redirect(`https://eduxcel.vercel.app/profile?token=${token}`);
     } catch (error) {
       console.error('Google OAuth callback error:', error);
       res.status(500).json({ error: 'Internal Server Error' });
