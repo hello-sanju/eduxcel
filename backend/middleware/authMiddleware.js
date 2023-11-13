@@ -3,6 +3,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
 
+// authMiddleware.js
 const authMiddleware = async (req, res, next) => {
   try {
     const token = req.header('Authorization');
