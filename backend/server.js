@@ -78,10 +78,11 @@ passport.serializeUser((user, done) => {
 });
 
 passport.deserializeUser((id, done) => {
-  User.findById(id, (err, user) => {
+  User.findById(id).exec((err, user) => {
     done(err, user);
   });
 });
+
 
 
 // Google OAuth2 routes
