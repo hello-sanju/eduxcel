@@ -357,7 +357,7 @@ app.get(
       }
 
       // Generate a JWT token for the user
-      const token = jwt.sign({ userId: user._id }, 'your-secret-key', {
+      const token = jwt.sign({ userId: user._id }, 'fRwD8ZcX#k5H*J!yN&2G@pQbS9v6E$tA', {
         expiresIn: '1h',
       });
 
