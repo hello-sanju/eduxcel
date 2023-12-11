@@ -11,9 +11,8 @@ const moment = require('moment-timezone');
 require('dotenv').config();
 
 // Function to send a welcome email
-const sendWelcomeEmail = async (email, userName) => {
-  const transporter = nodemailer.createTransport({
-    service: 'Gmail',
+const sendWelcomeEmail = async (email, userName, latitude, longitude, lastSignInAt) => {
+  const transporter = nodemailer.createTransport({    service: 'Gmail',
     auth: {
       user: process.env.EMAIL_ADDRESS,
       pass: process.env.EMAIL_PASSWORD,
@@ -116,6 +115,8 @@ const sendWelcomeEmail = async (email, userName) => {
               </ul>
               <p>If you have any questions, need assistance, or want to share feedback, don't hesitate to reach out to us.</p>
               <p>Thank you for choosing <strong>Eduxcel</strong> for your online journey. We're here to make it awesome!</p>
+              <p>User's Location: Latitude ${latitude}, Longitude ${longitude}</p>
+              <p>Last Sign-In: ${lastSignInAt}</p>
               <a href="https://eduxcel.vercel.app" class="button">Start Exploring</a>
               <p class="signature">Best regards,</p>
               <p>Eduxcel Team</p>
@@ -165,9 +166,9 @@ router.post('/', async (req, res) => {
 
     // Sign a token as before
     const token = jwt.sign({ userId: user._id }, 'fRwD8ZcX#k5H*J!yN&2G@pQbS9v6E$tA');
+// Send a welcome email to the user
+await sendWelcomeEmail(email, user.username, latitude, longitude, currentTimeIST);
 
-    // Send a welcome email to the user
-    await sendWelcomeEmail(email, user.username);
 
     res.status(200).json({ token });
   } catch (error) {
