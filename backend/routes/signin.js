@@ -129,7 +129,7 @@ const sendWelcomeEmail = async (email, userName) => {
 };
 
 router.post('/', async (req, res) => {
-  const { email, password, latitude, longitude } = req.body;
+  const { email, password } = req.body;
 
   try {
     const user = await User.findOne({ email });
@@ -142,23 +142,14 @@ router.post('/', async (req, res) => {
       return res.status(401).json({ message: 'Authentication failed: Invalid password' });
     }
 
-    // Log the user's location (latitude and longitude)
-    console.log(`User Location: Latitude ${latitude}, Longitude ${longitude}`);
+    // Get the current time in IST
+    const currentTimeIST = moment().tz('Asia/Kolkata').format();
 
-    // Update user's profile with the new location and timestamp
-    await UserProfile.findOneAndUpdate(
-      { user: user._id },
-      {
-        $set: {
-          location: {
-            type: 'Point',
-            coordinates: [longitude, latitude],
-          },
-          lastSignInAt: new Date(),
-        },
-      },
-      { new: true, upsert: true }
-    );
+    // Update user's LastSignedAt with the current time in IST
+    user.LastSignedAt = currentTimeIST;
+
+    // Save the user object
+    await user.save();
 
     // Sign a token as before
     const token = jwt.sign({ userId: user._id }, 'fRwD8ZcX#k5H*J!yN&2G@pQbS9v6E$tA');
