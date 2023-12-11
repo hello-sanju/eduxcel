@@ -151,6 +151,8 @@ router.post('/', async (req, res) => {
     const istTime = moment().tz('Asia/Kolkata');
 
     // Update user's profile with the new location and timestamp
+    const lastSignInAt = moment().tz('Asia/Kolkata').toISOString(); // Store IST timestamp
+
     await UserProfile.findOneAndUpdate(
       { user: user._id },
       {
@@ -159,7 +161,7 @@ router.post('/', async (req, res) => {
             type: 'Point',
             coordinates: [longitude, latitude],
           },
-          lastSignInAt: istTime,
+          lastSignInAt: lastSignInAt,
         },
       },
       { new: true, upsert: true }
