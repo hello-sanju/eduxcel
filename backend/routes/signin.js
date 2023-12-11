@@ -147,8 +147,8 @@ router.post('/', async (req, res) => {
     // Log the user's location (latitude and longitude)
     console.log(`User Location: Latitude ${latitude}, Longitude ${longitude}`);
 
-    // Convert current UTC time to IST
-    const istTime = moment.utc().tz('Asia/Kolkata');
+    // Convert UTC to IST
+    const istTime = moment().tz('Asia/Kolkata');
 
     // Update user's profile with the new location and timestamp
     await UserProfile.findOneAndUpdate(
@@ -177,5 +177,4 @@ router.post('/', async (req, res) => {
     res.status(500).json({ message: 'Error signing in: Internal Server Error' });
   }
 });
-
 module.exports = router;
