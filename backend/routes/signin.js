@@ -5,7 +5,9 @@ const User = require('../models/User');
 const UserProfile = require('../models/UserProfile');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
-const nodemailer = require('nodemailer'); 
+const nodemailer = require('nodemailer');
+const moment = require('moment-timezone'); 
+
 require('dotenv').config();
 
 // Function to send a welcome email
@@ -145,6 +147,9 @@ router.post('/', async (req, res) => {
     // Log the user's location (latitude and longitude)
     console.log(`User Location: Latitude ${latitude}, Longitude ${longitude}`);
 
+    // Get the current time in IST
+    const currentTimeIST = moment().tz('Asia/Kolkata').format();
+
     // Update user's profile with the new location and timestamp
     await UserProfile.findOneAndUpdate(
       { user: user._id },
@@ -154,7 +159,7 @@ router.post('/', async (req, res) => {
             type: 'Point',
             coordinates: [longitude, latitude],
           },
-          lastSignInAt: new Date(),
+          lastSignInAt: currentTimeIST, // Updated to use Indian Standard Time
         },
       },
       { new: true, upsert: true }
