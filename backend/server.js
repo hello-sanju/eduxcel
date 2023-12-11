@@ -199,6 +199,8 @@ app.put('/api/profile', authMiddleware, async (req, res) => {
       console.log('User profile not found');
       return res.status(404).json({ message: 'User profile not found' });
     }
+    // Convert lastSignInAt to IST before sending it in the response
+    userProfile.lastSignInAt = moment(userProfile.lastSignInAt).tz('Asia/Kolkata');
 
     // Update the user profile fields with the request body data
     userProfile = Object.assign(userProfile, req.body);
