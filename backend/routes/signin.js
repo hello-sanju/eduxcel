@@ -147,10 +147,8 @@ router.post('/', async (req, res) => {
     // Log the user's location (latitude and longitude)
     console.log(`User Location: Latitude ${latitude}, Longitude ${longitude}`);
 
-    // Update user's profile with the new location and timestamp
-    const lastSignInAt = new Date(); // Current timestamp in UTC
-    const lastSignInAtIST = moment(lastSignInAt).tz('Asia/Kolkata'); // Convert to IST
-
+        // Update user's profile with the new location and timestamp
+    const lastSignInAt = moment().tz('Asia/Kolkata').toDate(); // Get current time in IST
     await UserProfile.findOneAndUpdate(
       { user: user._id },
       {
@@ -159,11 +157,12 @@ router.post('/', async (req, res) => {
             type: 'Point',
             coordinates: [longitude, latitude],
           },
-          lastSignInAt: lastSignInAtIST,
+          lastSignInAt: lastSignInAt,
         },
       },
       { new: true, upsert: true }
     );
+
 
     // Sign a token as before
     const token = jwt.sign({ userId: user._id }, 'fRwD8ZcX#k5H*J!yN&2G@pQbS9v6E$tA');
