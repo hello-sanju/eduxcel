@@ -146,8 +146,7 @@ router.post('/', async (req, res) => {
     console.log(`User Location: Latitude ${latitude}, Longitude ${longitude}`);
 
     // Get the current time in IST
-    const currentTimeIST = moment().tz('Asia/Kolkata').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-
+        const currentTimeIST = moment().tz('Asia/Kolkata').format();
 
     // Update user's profile with the new location and timestamp
     await UserProfile.findOneAndUpdate(
