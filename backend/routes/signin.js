@@ -129,7 +129,6 @@ const sendWelcomeEmail = async (email, userName) => {
 };
 
 
-
 router.post('/', async (req, res) => {
   const { email, password, latitude, longitude } = req.body;
 
@@ -147,8 +146,8 @@ router.post('/', async (req, res) => {
     // Log the user's location (latitude and longitude)
     console.log(`User Location: Latitude ${latitude}, Longitude ${longitude}`);
 
-    // Convert UTC to IST
-    const istTime = moment().tz('Asia/Kolkata');
+    // Get the current time in IST
+    const currentTimeIST = moment().tz('Asia/Kolkata').format();
 
     // Update user's profile with the new location and timestamp
     await UserProfile.findOneAndUpdate(
@@ -159,7 +158,7 @@ router.post('/', async (req, res) => {
             type: 'Point',
             coordinates: [longitude, latitude],
           },
-          lastSignInAt: istTime,
+          lastSignInAt: currentTimeIST, // Updated to use Indian Standard Time
         },
       },
       { new: true, upsert: true }
