@@ -221,7 +221,7 @@ app.get('/uploads/:filename', (req, res) => {
   res.setHeader('Cache-Control', 'no-store'); // Disable caching
   res.sendFile(path.join(__dirname, 'uploads', req.params.filename));
 });
-app.get('/api/submit-feedback', async (req, res) => {
+app.get('/api/feedbacks', async (req, res) => {
   try {
     const feedbacks = await Feedback.find();
     res.json(feedbacks);
@@ -231,7 +231,7 @@ app.get('/api/submit-feedback', async (req, res) => {
   }
 });
 
-app.get('/api/submit-query', async (req, res) => {
+app.get('/api/queries', async (req, res) => {
   try {
     const queries = await Query.find();
     res.json(queries);
