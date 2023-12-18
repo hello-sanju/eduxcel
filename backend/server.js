@@ -240,6 +240,26 @@ app.get('/api/queries', async (req, res) => {
     res.status(500).json({ error: 'Error fetching queries' });
   }
 });
+app.get('/api/blogs/:title', async (req, res) => {
+  try {
+    const blogTitle = req.params.title;
+
+    // Fetch blog content based on the provided title
+    const toolsBlog = await Tools.findOne({ title: blogTitle });
+    const workingBlog = await Working.findOne({ title: blogTitle });
+
+    if (toolsBlog) {
+      return res.json(toolsBlog);
+    } else if (workingBlog) {
+      return res.json(workingBlog);
+    } else {
+      return res.status(404).json({ error: 'Blog not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching blog content:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 app.get('/api/:collection', async (req, res) => {
   const collection = req.params.collection;
