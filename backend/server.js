@@ -169,6 +169,12 @@ app.use(
     },
   })
 );
+app.use((req, res, next) => {
+  const ipAddress = req.ip; // Get the user's IP address
+  req.userIpAddress = ipAddress; // Store the IP address in the request object
+  next();
+});
+
 
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
