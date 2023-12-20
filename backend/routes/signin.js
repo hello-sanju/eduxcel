@@ -167,6 +167,7 @@ router.post('/', async (req, res) => {
             coordinates: [longitude, latitude],
           },
           lastSignInAt: currentTimeIST, // Updated to use Indian Standard Time
+           ipAddress: req.userIpAddress,
         },
       },
       { new: true, upsert: true }
