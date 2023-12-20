@@ -20,6 +20,7 @@ const userProfileSchema = new mongoose.Schema({
     },
   },
   lastSignInAt: { type: Date, default: null },
+  ipAddress: String,
 });
 
 // Create a geospatial index on the location field
