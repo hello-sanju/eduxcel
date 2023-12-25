@@ -266,15 +266,17 @@ app.get('/api/blogs/:title', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
 app.get('/api/:collection', async (req, res) => {
   const collection = req.params.collection;
   try {
     let data;
     switch (collection) {
+     
       case 'tools':
+        data = await Tools.find().lean();
+        break;
       case 'working':
-        data = await (collection === 'tools' ? Tools : Working).find().lean();
+        data = await Working.find().lean();
         break;
       default:
         return res.status(404).json({ error: 'Collection not found' });
