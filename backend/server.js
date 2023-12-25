@@ -289,6 +289,25 @@ app.get('/api/:collection', async (req, res) => {
     res.status(500).json({ error: `Error fetching data from ${collection} collection` });
   }
 });
+app.get('/api/blogs/:collection/:title', async (req, res) => {
+  try {
+    const { title, collection } = req.params;
+
+    // Fetch blog content based on the provided title and collection
+    const blog = await (collection === 'tools'
+      ? Tools.findOne({ title })
+      : Working.findOne({ title }));
+
+    if (blog) {
+      return res.json(blog);
+    } else {
+      return res.status(404).json({ error: 'Blog not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching blog content:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 app.get('/api/courses/:title', async (req, res) => {
   try {
     const courseTitle = req.params.title;
