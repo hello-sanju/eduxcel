@@ -69,8 +69,7 @@ const Working = mongoose.model('working', {
   imageURL: [String],
   videoURL: [String],
 });
-
-const Courses = mongoose.model('courses', {
+const courseSchema = {
   title: String,
   description: String,
   content: [{
@@ -80,31 +79,10 @@ const Courses = mongoose.model('courses', {
     imageURL: String,
     // Add other properties as needed
   }]
-});
+};
 
-const WebDevelopmentCourses = mongoose.model('webdevelopmentcourses', {
-  title: String,
-  description: String,
-  content: [{
-    title: String,
-    description: String,
-    videoURL: String,
-    imageURL: String,
-    // Add other properties as needed
-  }]
-});
-
-const DataScienceCourses = mongoose.model('datasciencecourses', {
-  title: String,
-  description: String,
-  content: [{
-    title: String,
-    description: String,
-    videoURL: String,
-    imageURL: String,
-    // Add other properties as needed
-  }]
-});
+// Create a base model for courses
+const Courses = mongoose.model('courses', courseSchema);
 
 
 // Define Passport strategies
@@ -344,6 +322,7 @@ app.get('/api/blogs/:collection/:title', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+// Fetch details of a specific course by title
 app.get('/api/courses/:title', async (req, res) => {
   try {
     const courseTitle = req.params.title;
@@ -366,10 +345,10 @@ app.get('/api/courses/:collection/:title', async (req, res) => {
     const { collection, title } = req.params;
     const decodedTitle = decodeURIComponent(title);
 
-    // Dynamically select the model based on the collection parameter
-    const CourseModel = mongoose.model(collection, Courses.schema);
+    // Dynamically create a model based on the collection parameter
+    const CourseModel = mongoose.model(collection, courseSchema);
 
-    // Fetch content based on the provided title and collection
+    // Fetch content based on the provided title
     const content = await CourseModel.findOne({ title: decodedTitle });
 
     if (content) {
