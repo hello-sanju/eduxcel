@@ -69,7 +69,7 @@ const Working = mongoose.model('working', {
   imageURL: [String],
   videoURL: [String],
 });
-const Courses = mongoose.model('courses', {
+const baseCourseSchema = {
   title: String,
   description: String,
   content: [{
@@ -78,8 +78,15 @@ const Courses = mongoose.model('courses', {
     videoURL: String,
     imageURL: String,
     // Add other properties as needed
-  }]
-});
+  }],
+};
+
+// Define models for different collections based on the base schema
+const FullstackCourse = mongoose.model('fullstack', baseCourseSchema);
+const FrontendCourse = mongoose.model('frontend', baseCourseSchema);
+const HtmlCourse = mongoose.model('html', baseCourseSchema);
+const CssCourse = mongoose.model('css', baseCourseSchema);
+const JavascriptCourse = mongoose.model('javascript', baseCourseSchema);
 
 
 
@@ -324,7 +331,9 @@ app.get('/api/blogs/:collection/:title', async (req, res) => {
 app.get('/api/courses/:title', async (req, res) => {
   try {
     const courseTitle = req.params.title;
-    const course = await Courses.findOne({ title: courseTitle });
+    // You need to decide which model to use based on your application logic
+    // For example, you can use the FullstackCourse model for all collections
+    const course = await FullstackCourse.findOne({ title: courseTitle });
 
     if (!course) {
       return res.status(404).json({ error: 'Course not found' });
@@ -345,11 +354,24 @@ app.get('/api/courses/:collection/:title', async (req, res) => {
 
     // Dynamically select the model based on the collection parameter
     let CourseModel;
-
-    try {
-      CourseModel = mongoose.model(collection);
-    } catch (error) {
-      return res.status(404).json({ error: 'Collection not found' });
+    switch (collection) {
+      case 'fullstack':
+        CourseModel = FullstackCourse;
+        break;
+      case 'frontend':
+        CourseModel = FrontendCourse;
+        break;
+      case 'html':
+        CourseModel = HtmlCourse;
+        break;
+      case 'css':
+        CourseModel = CssCourse;
+        break;
+      case 'javascript':
+        CourseModel = JavascriptCourse;
+        break;
+      default:
+        return res.status(404).json({ error: 'Collection not found' });
     }
 
     // Fetch content based on the provided title and collection
