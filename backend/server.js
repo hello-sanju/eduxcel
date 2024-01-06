@@ -69,7 +69,7 @@ const Working = mongoose.model('working', {
   imageURL: [String],
   videoURL: [String],
 });
-const courseSchema = {
+const Courses = mongoose.model('courses', {
   title: String,
   description: String,
   content: [{
@@ -79,10 +79,8 @@ const courseSchema = {
     imageURL: String,
     // Add other properties as needed
   }]
-};
+});
 
-// Create a base model for courses
-const Courses = mongoose.model('courses', courseSchema);
 
 
 // Define Passport strategies
@@ -345,10 +343,16 @@ app.get('/api/courses/:collection/:title', async (req, res) => {
     const { collection, title } = req.params;
     const decodedTitle = decodeURIComponent(title);
 
-    // Dynamically create a model based on the collection parameter
-    const CourseModel = mongoose.model(collection, courseSchema);
+    // Dynamically select the model based on the collection parameter
+    let CourseModel;
 
-    // Fetch content based on the provided title
+    try {
+      CourseModel = mongoose.model(collection);
+    } catch (error) {
+      return res.status(404).json({ error: 'Collection not found' });
+    }
+
+    // Fetch content based on the provided title and collection
     const content = await CourseModel.findOne({ title: decodedTitle });
 
     if (content) {
@@ -362,6 +366,7 @@ app.get('/api/courses/:collection/:title', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 app.post('/api/submit-feedback', async (req, res) => {
   try {
