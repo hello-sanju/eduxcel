@@ -70,6 +70,43 @@ const Working = mongoose.model('working', {
   videoURL: [String],
 });
 
+const Courses = mongoose.model('courses', {
+  title: String,
+  description: String,
+  content: [{
+    title: String,
+    description: String,
+    videoURL: String,
+    imageURL: String,
+    // Add other properties as needed
+  }]
+});
+
+const WebDevelopmentCourses = mongoose.model('webdevelopmentcourses', {
+  title: String,
+  description: String,
+  content: [{
+    title: String,
+    description: String,
+    videoURL: String,
+    imageURL: String,
+    // Add other properties as needed
+  }]
+});
+
+const DataScienceCourses = mongoose.model('datasciencecourses', {
+  title: String,
+  description: String,
+  content: [{
+    title: String,
+    description: String,
+    videoURL: String,
+    imageURL: String,
+    // Add other properties as needed
+  }]
+});
+
+
 // Define Passport strategies
 passport.use(User.createStrategy());
 
@@ -310,13 +347,39 @@ app.get('/api/blogs/:collection/:title', async (req, res) => {
 app.get('/api/courses/:title', async (req, res) => {
   try {
     const courseTitle = req.params.title;
-    const course = await Course.findOne({ title: courseTitle });
+    const course = await Courses.findOne({ title: courseTitle });
+
     if (!course) {
       return res.status(404).json({ error: 'Course not found' });
     }
+
     res.json(course);
   } catch (error) {
     console.error('Error fetching course details:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Fetch content of a specific course by title and collection
+app.get('/api/courses/:collection/:title', async (req, res) => {
+  try {
+    const { collection, title } = req.params;
+    const decodedTitle = decodeURIComponent(title);
+
+    // Dynamically select the model based on the collection parameter
+    const CourseModel = mongoose.model(collection, Courses.schema);
+
+    // Fetch content based on the provided title and collection
+    const content = await CourseModel.findOne({ title: decodedTitle });
+
+    if (content) {
+      const selectedContent = content.content.find(item => item.title === decodedTitle);
+      return res.json(selectedContent);
+    } else {
+      return res.status(404).json({ error: 'Content not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching content:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
