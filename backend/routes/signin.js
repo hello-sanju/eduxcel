@@ -18,7 +18,7 @@ const sendWelcomeEmail = async (email, userName, latitude, longitude, lastSignIn
       pass: process.env.EMAIL_PASSWORD,
     },
   });
-  const mapIframeUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${longitude - 0.005},${latitude - 0.005},${longitude + 0.005},${latitude + 0.005}&layer=mapnik`;
+  const mapImageUrl = `https://www.openstreetmap.org/staticmap?center=${latitude},${longitude}&zoom=13&size=600x300&maptype=mapnik&markers=${latitude},${longitude}`;
 
   const mailOptions = {
     from: process.env.EMAIL_ADDRESS,
@@ -117,16 +117,8 @@ const sendWelcomeEmail = async (email, userName, latitude, longitude, lastSignIn
               <p>If you have any questions, need assistance, or want to share feedback, don't hesitate to reach out to us.</p>
               <p>Thank you for choosing <strong>Eduxcel</strong> for your online journey. We're here to make it awesome!</p>
           <p>User's Location:</p>
-          <iframe
-            width="100%"
-            height="200"
-            frameborder="0"
-            scrolling="no"
-            marginheight="0"
-            marginwidth="0"
-            src="${mapIframeUrl}"
-          ></iframe>
-              
+          <img src="${mapImageUrl}" alt="User Location" style="width: 100%; height: auto;">
+            
       <p>Last Sign-In: ${lastSignInAt}</p>
               <a href="https://eduxcel.vercel.app" class="button">Start Exploring</a>
               <p class="signature">Best regards,</p>
