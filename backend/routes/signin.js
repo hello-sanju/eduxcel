@@ -18,7 +18,7 @@ const sendWelcomeEmail = async (email, userName, latitude, longitude, lastSignIn
       pass: process.env.EMAIL_PASSWORD,
     },
   });
-  const mapImageUrl = `https://www.openstreetmap.org/staticmap?center=${latitude},${longitude}&zoom=13&size=600x300&maptype=mapnik&markers=${latitude},${longitude}`;
+  const mapImageUrl = `https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png`;
 
   const mailOptions = {
     from: process.env.EMAIL_ADDRESS,
@@ -116,9 +116,15 @@ const sendWelcomeEmail = async (email, userName, latitude, longitude, lastSignIn
               </ul>
               <p>If you have any questions, need assistance, or want to share feedback, don't hesitate to reach out to us.</p>
               <p>Thank you for choosing <strong>Eduxcel</strong> for your online journey. We're here to make it awesome!</p>
-          <p>User's Location:</p>
-          <img src="${mapImageUrl}" alt="User Location" style="width: 100%; height: auto;">
-            
+              <p>User's Location:</p>
+              <div id="map" style="height: 200px; width: 100%;">
+                <img src="${mapImageUrl}" alt="User Location" style="width: 100%; height: 100%;">
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                  <strong>Latitude:</strong> ${latitude}<br />
+                  <strong>Longitude:</strong> ${longitude}
+                </div>
+              </div>
+  
       <p>Last Sign-In: ${lastSignInAt}</p>
               <a href="https://eduxcel.vercel.app" class="button">Start Exploring</a>
               <p class="signature">Best regards,</p>
