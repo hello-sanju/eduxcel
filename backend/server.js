@@ -332,13 +332,15 @@ app.get('/api/blogs/:collection/:title', async (req, res) => {
     const { collection, title } = req.params;
     const decodedTitle = decodeURIComponent(title);
 
-    // Fetch content based on the provided title and collection
-    (async () => {
+    // Ensure the function is declared as async
+    const fetchContent = async () => {
       try {
+        // Fetch content based on the provided title and collection
         const content = await (collection === 'tools' ? Tools : Working).findOne({ title: decodedTitle });
 
         if (content) {
-          return res.json(content);
+          const selectedContent = content.content.find(item => item.title === decodedTitle);
+          return res.json(selectedContent);
         } else {
           return res.status(404).json({ error: 'Content not found' });
         }
@@ -346,7 +348,10 @@ app.get('/api/blogs/:collection/:title', async (req, res) => {
         console.error('Error fetching content:', error);
         res.status(500).json({ error: 'Internal Server Error' });
       }
-    })();
+    };
+
+    // Call the asynchronous function
+    await fetchContent();
   } catch (error) {
     console.error('Error handling request:', error);
     res.status(500).json({ error: 'Internal Server Error' });
