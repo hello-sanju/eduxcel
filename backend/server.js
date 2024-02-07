@@ -332,25 +332,26 @@ app.get('/api/blogs/:collection/:title', async (req, res) => {
     const { collection, title } = req.params;
     const decodedTitle = decodeURIComponent(title);
 
-    // Fetch blog content based on the provided title and collection
-    let blog;
-    if (collection === 'tools') {
-      blog = await Tools.findOne({ title: decodedTitle });
-    } else if (collection === 'working') {
-      blog = await Working.findOne({ title: decodedTitle });
-    }
+    // Fetch content based on the provided title and collection
+    (async () => {
+      try {
+        const content = await (collection === 'tools' ? Tools : Working).findOne({ title: decodedTitle });
 
-    if (blog) {
-      return res.json(blog);
-    } else {
-      return res.status(404).json({ error: 'Blog not found' });
-    }
+        if (content) {
+          return res.json(content);
+        } else {
+          return res.status(404).json({ error: 'Content not found' });
+        }
+      } catch (error) {
+        console.error('Error fetching content:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+    })();
   } catch (error) {
-    console.error('Error fetching blog content:', error);
+    console.error('Error handling request:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
     // Fetch content based on the provided title and collection
     const content = await CourseModel.findOne({ title: decodedTitle });
 
