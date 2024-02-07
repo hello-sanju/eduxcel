@@ -248,8 +248,8 @@ app.get('/uploads/:filename', (req, res) => {
 app.get('/api/random-blog-titles', async (req, res) => {
   try {
     // Fetch a random selection of 5 blog titles from the database
-    const randomToolsBlogs = await Tools.aggregate([{ $sample: { size: 3 } }]);
-    const randomWorkingBlogs = await Working.aggregate([{ $sample: { size: 2 } }]);
+    const randomToolsBlogs = await Tools.aggregate([{ $sample: { size: 4 } }]);
+    const randomWorkingBlogs = await Working.aggregate([{ $sample: { size: 1 } }]);
 
     // Combine and shuffle the titles
     const randomBlogTitles = [
