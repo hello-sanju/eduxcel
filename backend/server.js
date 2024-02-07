@@ -240,6 +240,33 @@ app.get('/uploads/:filename', (req, res) => {
   res.setHeader('Cache-Control', 'no-store'); // Disable caching
   res.sendFile(path.join(__dirname, 'uploads', req.params.filename));
 });
+
+
+// Add a new API endpoint to fetch random blog titles
+app.get('/api/random-blog-titles', async (req, res) => {
+  try {
+    // Fetch a random selection of 5 blog titles from the database
+    const randomToolsBlogs = await Tools.aggregate([{ $sample: { size: 3 } }]);
+    const randomWorkingBlogs = await Working.aggregate([{ $sample: { size: 2 } }]);
+
+    // Combine and shuffle the titles
+    const randomBlogTitles = [
+      ...randomToolsBlogs.map(blog => blog.title),
+      ...randomWorkingBlogs.map(blog => blog.title),
+    ].sort(() => Math.random() - 0.5).slice(0, 5);
+
+    res.json(randomBlogTitles);
+  } catch (error) {
+    console.error('Error fetching random blog titles:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
+
+
+
 app.get('/api/feedbacks', async (req, res) => {
   try {
     const feedbacks = await Feedback.find();
