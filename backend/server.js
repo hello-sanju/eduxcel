@@ -242,10 +242,9 @@ app.get('/uploads/:filename', (req, res) => {
 });
 
 
-// Add a new API endpoint to fetch random blog titles
-app.get('/api/random-blog-titles', async (req, res) => {
+app.get('/api/blogs/random-titles', async (req, res) => {
   try {
-    // Fetch a random selection of 5 blog titles from the database
+    // Fetch random blog titles from both 'tools' and 'working' collections
     const randomToolsBlogs = await Tools.aggregate([{ $sample: { size: 3 } }]);
     const randomWorkingBlogs = await Working.aggregate([{ $sample: { size: 2 } }]);
 
@@ -261,7 +260,6 @@ app.get('/api/random-blog-titles', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
 
 
 
