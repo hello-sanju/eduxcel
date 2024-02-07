@@ -168,6 +168,8 @@ passport.use(
 const allowedOrigins = [
   'https://eduxcel.vercel.app',
   'http://localhost:5173',
+    'https://sanjay-patidar.vercel.app',
+
   // Add more domains if needed
 ];
 
