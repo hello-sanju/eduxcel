@@ -428,20 +428,6 @@ app.get('/api/courses/:title/:module', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
- // Fetch content based on the provided title and collection
-    const content = await CourseModel.findOne({ title: decodedTitle });
-
-    if (content) {
-      const selectedContent = content.content.find(item => item.title === decodedTitle);
-      return res.json(selectedContent);
-    } else {
-      return res.status(404).json({ error: 'Content not found' });
-    }
-  } catch (error) {
-    console.error('Error fetching content:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
 // Google OAuth2 routes
 app.get(
   '/auth/google',
