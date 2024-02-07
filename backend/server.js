@@ -81,13 +81,6 @@ const baseCourseSchema = {
   }],
 };
 
-// Define models for different collections based on the base schema
-const FullstackCourse = mongoose.model('fullstack', baseCourseSchema);
-const FrontendCourse = mongoose.model('frontend', baseCourseSchema);
-const HtmlCourse = mongoose.model('html', baseCourseSchema);
-const CssCourse = mongoose.model('css', baseCourseSchema);
-const JavascriptCourse = mongoose.model('javascript', baseCourseSchema);
-
 
 
 // Define Passport strategies
@@ -327,52 +320,7 @@ app.get('/api/blogs/:collection/:title', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-// Fetch details of a specific course by title
-app.get('/api/courses/:title', async (req, res) => {
-  try {
-    const courseTitle = req.params.title;
-    // You need to decide which model to use based on your application logic
-    // For example, you can use the FullstackCourse model for all collections
-    const course = await FullstackCourse.findOne({ title: courseTitle });
 
-    if (!course) {
-      return res.status(404).json({ error: 'Course not found' });
-    }
-
-    res.json(course);
-  } catch (error) {
-    console.error('Error fetching course details:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-// Fetch content of a specific course by title and collection
-app.get('/api/courses/:collection/:title', async (req, res) => {
-  try {
-    const { collection, title } = req.params;
-    const decodedTitle = decodeURIComponent(title);
-
-    // Dynamically select the model based on the collection parameter
-    let CourseModel;
-    switch (collection) {
-      case 'fullstack':
-        CourseModel = FullstackCourse;
-        break;
-      case 'frontend':
-        CourseModel = FrontendCourse;
-        break;
-      case 'html':
-        CourseModel = HtmlCourse;
-        break;
-      case 'css':
-        CourseModel = CssCourse;
-        break;
-      case 'javascript':
-        CourseModel = JavascriptCourse;
-        break;
-      default:
-        return res.status(404).json({ error: 'Collection not found' });
-    }
 
     // Fetch content based on the provided title and collection
     const content = await CourseModel.findOne({ title: decodedTitle });
