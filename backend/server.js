@@ -69,18 +69,25 @@ const Working = mongoose.model('working', {
   imageURL: [String],
   videoURL: [String],
 });
-const baseCourseSchema = {
-  title: String,
-  description: String,
-  content: [{
-    title: String,
-    description: String,
-    videoURL: String,
-    imageURL: String,
-    // Add other properties as needed
-  }],
-};
 
+
+const Careers = mongoose.model('careers', {
+  title: String,
+  overview: [String],
+  description: [String],
+  keypoints: [String],
+  imageURL: [String],
+  videoURL: [String],
+});
+
+const Choice = mongoose.model('choice', {
+  title: String,
+  overview: [String],
+  description: [String],
+  keypoints: [String],
+  imageURL: [String],
+  videoURL: [String],
+});
 
 
 // Define Passport strategies
@@ -360,6 +367,83 @@ app.get('/api/blogs/:collection/:title', async (req, res) => {
   }
 });
    
+
+
+app.get('/api/blogs/:title', async (req, res) => {
+  try {
+    const blogTitle = req.params.title;
+
+    // Fetch blog content based on the provided title
+    const careersBlog = await Careers.findOne({ title: blogTitle });
+    const choiceBlog = await Choice.findOne({ title: blogTitle });
+
+    if (careersBlog) {
+      return res.json(careersBlog);
+    } else if (choiceBlog) {
+      return res.json(choiceBlog);
+    } else {
+      return res.status(404).json({ error: 'Blog not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching blog content:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+app.get('/api/:collection', async (req, res) => {
+  const collection = req.params.collection;
+  try {
+    let data;
+    switch (collection) {
+     
+      case 'careers':
+        data = await Careers.find().lean();
+        break;
+      case 'choice':
+        data = await Choice.find().lean();
+        break;
+      default:
+        return res.status(404).json({ error: 'Collection not found' });
+    }
+    console.log('Data fetched successfully from', collection, 'collection:', data);
+    res.json(data);
+  } catch (error) {
+    console.error(`Error fetching data from ${collection} collection:`, error);
+    res.status(500).json({ error: `Error fetching data from ${collection} collection` });
+  }
+});
+
+app.get('/api/blogs/:collection/:title', async (req, res) => {
+  try {
+    const { collection, title } = req.params;
+    const decodedTitle = decodeURIComponent(title);
+
+    // Ensure the function is declared as async
+    const fetchContent = async () => {
+      try {
+        // Fetch content based on the provided title and collection
+        const content = await (collection === 'careers' ? Careers : Choice).findOne({ title: decodedTitle });
+
+        if (content) {
+          const selectedContent = content.content.find(item => item.title === decodedTitle);
+          return res.json(selectedContent);
+        } else {
+          return res.status(404).json({ error: 'Content not found' });
+        }
+      } catch (error) {
+        console.error('Error fetching content:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+    };
+
+    // Call the asynchronous function
+    await fetchContent();
+  } catch (error) {
+    console.error('Error handling request:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+   
+
 
 
 app.post('/api/submit-feedback', async (req, res) => {
