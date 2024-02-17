@@ -298,13 +298,18 @@ app.get('/api/blogs/:title', async (req, res) => {
     const blogTitle = req.params.title;
 
     // Fetch blog content based on the provided title
-    const toolsBlog = await Tools.findOne({ title: blogTitle });
-    const workingBlog = await Working.findOne({ title: blogTitle });
+    let blogContent;
+    // Check for blogs in different collections
+    if (req.params.collection === 'tools') {
+      blogContent = await Tools.findOne({ title: blogTitle });
+    } else if (req.params.collection === 'working') {
+      blogContent = await Working.findOne({ title: blogTitle });
+    } else {
+      blogContent = await Careers.findOne({ title: blogTitle }) || await Choice.findOne({ title: blogTitle });
+    }
 
-    if (toolsBlog) {
-      return res.json(toolsBlog);
-    } else if (workingBlog) {
-      return res.json(workingBlog);
+    if (blogContent) {
+      return res.json(blogContent);
     } else {
       return res.status(404).json({ error: 'Blog not found' });
     }
@@ -313,6 +318,7 @@ app.get('/api/blogs/:title', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 app.get('/api/:collection', async (req, res) => {
   const collection = req.params.collection;
   try {
@@ -343,7 +349,6 @@ app.get('/api/:collection', async (req, res) => {
     res.status(500).json({ error: `Error fetching data from ${collection} collection` });
   }
 });
-
 app.get('/api/blogs/:collection/:title', async (req, res) => {
   try {
     const { collection, title } = req.params;
@@ -352,8 +357,15 @@ app.get('/api/blogs/:collection/:title', async (req, res) => {
     // Ensure the function is declared as async
     const fetchContent = async () => {
       try {
+        let content;
         // Fetch content based on the provided title and collection
-        const content = await (collection === 'tools' ? Tools : Working).findOne({ title: decodedTitle });
+        if (collection === 'careers') {
+          content = await Careers.findOne({ title: decodedTitle });
+        } else if (collection === 'tools') {
+          content = await Tools.findOne({ title: decodedTitle });
+        } else {
+          content = await Working.findOne({ title: decodedTitle });
+        }
 
         if (content) {
           const selectedContent = content.content.find(item => item.title === decodedTitle);
@@ -374,61 +386,9 @@ app.get('/api/blogs/:collection/:title', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-   
 
 
-app.get('/api/blogs/:title', async (req, res) => {
-  try {
-    const blogTitle = req.params.title;
 
-    // Fetch blog content based on the provided title
-    const careersBlog = await Careers.findOne({ title: blogTitle });
-    const choiceBlog = await Choice.findOne({ title: blogTitle });
-
-    if (careersBlog) {
-      return res.json(careersBlog);
-    } else if (choiceBlog) {
-      return res.json(choiceBlog);
-    } else {
-      return res.status(404).json({ error: 'Blog not found' });
-    }
-  } catch (error) {
-    console.error('Error fetching blog content:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-app.get('/api/blogs/:collection/:title', async (req, res) => {
-  try {
-    const { collection, title } = req.params;
-    const decodedTitle = decodeURIComponent(title);
-
-    // Ensure the function is declared as async
-    const fetchContent = async () => {
-      try {
-        // Fetch content based on the provided title and collection
-        const content = await (collection === 'careers' ? Careers : Choice).findOne({ title: decodedTitle });
-
-        if (content) {
-          const selectedContent = content.content.find(item => item.title === decodedTitle);
-          return res.json(selectedContent);
-        } else {
-          return res.status(404).json({ error: 'Content not found' });
-        }
-      } catch (error) {
-        console.error('Error fetching content:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-      }
-    };
-
-    // Call the asynchronous function
-    await fetchContent();
-  } catch (error) {
-    console.error('Error handling request:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-   
 
 
 
