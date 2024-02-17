@@ -325,6 +325,14 @@ app.get('/api/:collection', async (req, res) => {
       case 'working':
         data = await Working.find().lean();
         break;
+
+         case 'careers':
+        data = await Careers.find().lean();
+        break;
+      case 'choice':
+        data = await Choice.find().lean();
+        break;
+     
       default:
         return res.status(404).json({ error: 'Collection not found' });
     }
@@ -387,28 +395,6 @@ app.get('/api/blogs/:title', async (req, res) => {
   } catch (error) {
     console.error('Error fetching blog content:', error);
     res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-app.get('/api/:collection', async (req, res) => {
-  const collection = req.params.collection;
-  try {
-    let data;
-    switch (collection) {
-     
-      case 'careers':
-        data = await Careers.find().lean();
-        break;
-      case 'choice':
-        data = await Choice.find().lean();
-        break;
-      default:
-        return res.status(404).json({ error: 'Collection not found' });
-    }
-    console.log('Data fetched successfully from', collection, 'collection:', data);
-    res.json(data);
-  } catch (error) {
-    console.error(`Error fetching data from ${collection} collection:`, error);
-    res.status(500).json({ error: `Error fetching data from ${collection} collection` });
   }
 });
 
