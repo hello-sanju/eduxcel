@@ -18,9 +18,11 @@ const User = require('./models/User'); // Import the User model
 const UserProfile = require('./models/UserProfile'); // Import the UserProfile model
 const jwt = require('jsonwebtoken'); // Import the jsonwebtoken package
 const { verifyGoogleToken } = require('./middleware/authMiddleware');
+const cookieParser = require('cookie-parser');
 
 dotenv.config();
 const app = express();
+app.use(cookieParser());
 
 // Configure sessions before Passport middleware
 app.use(
@@ -30,6 +32,13 @@ app.use(
     saveUninitialized: false,
   })
 );
+app.get('/', (req, res) => {
+  res.cookie('cookieName', 'value', { 
+    sameSite: 'None', 
+    secure: true 
+  });
+  res.send('Cookie set successfully');
+});
 
 app.use(passport.initialize());
 app.use(passport.session());
