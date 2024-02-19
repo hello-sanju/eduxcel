@@ -265,12 +265,12 @@ app.get('/api/random-blog-titles', async (req, res) => {
   try {
     // Fetch a random selection of 5 blog titles from the database
     const randomToolsBlogs = await Tools.aggregate([{ $sample: { size: 4 } }]);
-    const randomWorkingBlogs = await Working.aggregate([{ $sample: { size: 1 } }]);
+    const randomCareersBlogs = await Careers.aggregate([{ $sample: { size: 1 } }]);
 
     // Combine and shuffle the titles
     const randomBlogTitles = [
       ...randomToolsBlogs.map(blog => blog.title),
-      ...randomWorkingBlogs.map(blog => blog.title),
+      ...randomCareersBlogs.map(blog => blog.title),
     ].sort(() => Math.random() - 0.5).slice(0, 5);
 
     res.json(randomBlogTitles);
