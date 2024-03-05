@@ -97,6 +97,87 @@ const Choice = mongoose.model('choice', {
   imageURL: [String],
   videoURL: [String],
 });
+// Define schema for HTML courses
+const HTMLCourseSchema = new mongoose.Schema({
+  title: String,
+  overview: [String],
+  description: [String],
+  keypoints: [String],
+  imageURL: [String],
+  videoURL: [String],
+});
+
+// Define schema for CSS courses
+const CSSCourseSchema = new mongoose.Schema({
+  title: String,
+  overview: [String],
+  description: [String],
+  keypoints: [String],
+  imageURL: [String],
+  videoURL: [String],
+});
+
+// Define schema for JavaScript courses
+const JavaScriptCourseSchema = new mongoose.Schema({
+  title: String,
+  overview: [String],
+  description: [String],
+  keypoints: [String],
+  imageURL: [String],
+  videoURL: [String],
+});
+
+// Define schema for Responsive Web Design courses
+const ResponsiveWebDesignCourseSchema = new mongoose.Schema({
+  title: String,
+  overview: [String],
+  description: [String],
+  keypoints: [String],
+  imageURL: [String],
+  videoURL: [String],
+});
+
+
+// Define schema for CSS Preprocessors courses
+const CSSPreprocessorsCourseSchema = new mongoose.Schema({
+  title: String,
+  overview: [String],
+  description: [String],
+  keypoints: [String],
+  imageURL: [String],
+  videoURL: [String],
+});
+
+
+// Define schema for DOM Manipulation courses
+const DOMManipulationCourseSchema = new mongoose.Schema({
+  title: String,
+  overview: [String],
+  description: [String],
+  keypoints: [String],
+  imageURL: [String],
+  videoURL: [String],
+});
+
+// Create models for each topic
+const HTMLCourses = mongoose.model('html_courses', HTMLCourseSchema);
+
+const CSSCourses = mongoose.model('css_courses', CSSCourseSchema);
+const JavaScriptCourses = mongoose.model('javascript_courses', JavaScriptCourseSchema);
+const ResponsiveWebDesignCourses = mongoose.model('responsive_web_design_courses', ResponsiveWebDesignCourseSchema);
+const CSSPreprocessorsCourses = mongoose.model('css_preprocessors_courses', CSSPreprocessorsCourseSchema);
+const DOMManipulationCourses = mongoose.model('dom_manipulation_courses', DOMManipulationCourseSchema);
+
+// Export the models
+module.exports = {
+  HTMLCourses,
+  CSSCourses,
+  JavaScriptCourses,
+  ResponsiveWebDesignCourses,
+  CSSPreprocessorsCourses,
+  DOMManipulationCourses,
+};
+
 
 
 // Define Passport strategies
@@ -375,7 +456,50 @@ app.get('/api/courses/details/:id', async (req, res) => {
 });
 
 
-
+  app.get('/api/:category', async (req, res) => {
+    const { category } = req.params;
+    try {
+      let courseContent;
+      // Fetch course content based on the provided category
+      switch (category) {
+        case 'html_courses':
+          courseContent = await FrontendCourses.find().lean();
+          break;
+        case 'css_courses':
+          courseContent = await DataScienceCourses.find().lean();
+          break;
+        case 'javascript_courses':
+          courseContent = await MachineLearningCourses.find().lean();
+          break;
+          case 'css_frameworks_courses':
+            courseContent = await MachineLearningCourses.find().lean();
+            break;
+            case 'css_preprocessors_courses':
+              courseContent = await MachineLearningCourses.find().lean();
+              break;
+              case 'dom_manipulation_courses':
+                courseContent = await MachineLearningCourses.find().lean();
+                break;
+        default:
+          // Check if the category matches any collection in the database
+          const collection = await db.collection(category).find().lean();
+          if (collection.length > 0) {
+            courseContent = collection;
+          } else {
+            return res.status(404).json({ error: 'Category not found' });
+          }
+      }
+  
+      if (courseContent.length > 0) {
+        return res.json(courseContent);
+      } else {
+        return res.status(404).json({ error: 'Course not found' });
+      }
+    } catch (error) {
+      console.error('Error fetching course content:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
 
 
 app.get('/api/:collection', async (req, res) => {
