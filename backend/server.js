@@ -409,6 +409,37 @@ app.get('/api/blogs/:title', async (req, res) => {
   }
 });
 
+app.get('/api/:collection', async (req, res) => {
+  const collection = req.params.collection;
+  try {
+    let data;
+    switch (collection) {
+     
+      case 'tools':
+        data = await Tools.find().lean();
+        break;
+      case 'working':
+        data = await Working.find().lean();
+        break;
+
+         case 'careers':
+        data = await Careers.find().lean();
+        break;
+      case 'choice':
+        data = await Choice.find().lean();
+        break;
+     
+      default:
+        return res.status(404).json({ error: 'Collection not found' });
+    }
+    console.log('Data fetched successfully from', collection, 'collection:', data);
+    res.json(data);
+  } catch (error) {
+    console.error(`Error fetching data from ${collection} collection:`, error);
+    res.status(500).json({ error: `Error fetching data from ${collection} collection` });
+  }
+});
+
 // new api for courses based on category
 app.get('/api/courses/category/:category', async (req, res) => {
   try {
@@ -503,36 +534,6 @@ app.get('/api/courses/details/:id', async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
-app.get('/api/:collection', async (req, res) => {
-  const collection = req.params.collection;
-  try {
-    let data;
-    switch (collection) {
-     
-      case 'tools':
-        data = await Tools.find().lean();
-        break;
-      case 'working':
-        data = await Working.find().lean();
-        break;
-
-         case 'careers':
-        data = await Careers.find().lean();
-        break;
-      case 'choice':
-        data = await Choice.find().lean();
-        break;
-     
-      default:
-        return res.status(404).json({ error: 'Collection not found' });
-    }
-    console.log('Data fetched successfully from', collection, 'collection:', data);
-    res.json(data);
-  } catch (error) {
-    console.error(`Error fetching data from ${collection} collection:`, error);
-    res.status(500).json({ error: `Error fetching data from ${collection} collection` });
-  }
-});
 app.get('/api/blogs/:collection/:title', async (req, res) => {
   try {
     const { collection, title } = req.params;
