@@ -463,26 +463,29 @@ app.get('/api/courses/details/:id', async (req, res) => {
       // Fetch course content based on the provided category
       switch (category) {
         case 'html_courses':
-          courseContent = await FrontendCourses.find().lean();
+          courseContent = await HTMLCourses.find().lean();
           break;
         case 'css_courses':
-          courseContent = await DataScienceCourses.find().lean();
+          courseContent = await CSSCourses.find().lean();
           break;
         case 'javascript_courses':
-          courseContent = await MachineLearningCourses.find().lean();
+          courseContent = await JavaScriptCourses.find().lean();
           break;
           case 'css_frameworks_courses':
-            courseContent = await MachineLearningCourses.find().lean();
+            courseContent = await CSSFrameworksCourses.find().lean();
             break;
             case 'css_preprocessors_courses':
-              courseContent = await MachineLearningCourses.find().lean();
+              courseContent = await CSSPreprocessorsCourses.find().lean();
+              break;
+              case 'responsive_web_design_courses':
+              courseContent = await ResponsiveWebDesignCourses.find().lean();
               break;
               case 'dom_manipulation_courses':
-                courseContent = await MachineLearningCourses.find().lean();
+                courseContent = await DOMManipulationCourses.find().lean();
                 break;
         default:
           // Check if the category matches any collection in the database
-          const collection = await db.collection(category).find().lean();
+          const collection = await mydb.collection(category).find().lean();
           if (collection.length > 0) {
             courseContent = collection;
           } else {
@@ -500,8 +503,6 @@ app.get('/api/courses/details/:id', async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
-
-
 app.get('/api/:collection', async (req, res) => {
   const collection = req.params.collection;
   try {
