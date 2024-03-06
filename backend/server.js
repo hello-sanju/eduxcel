@@ -61,42 +61,6 @@ const Feedback = mongoose.model('feedback', {
   feedback: String,
 });
 const Query = mongoose.model('query', { name: String, email: String, query: String });
-const Tools = mongoose.model('tools', {
-  title: String,
-  overview: [String],
-  description: [String],
-  keypoints: [String],
-  imageURL: [String],
-  videoURL: [String],
-});
-
-const Working = mongoose.model('working', {
-  title: String,
-  overview: [String],
-  description: [String],
-  keypoints: [String],
-  imageURL: [String],
-  videoURL: [String],
-});
-
-
-const Careers = mongoose.model('careers', {
-  title: String,
-  overview: [String],
-  description: [String],
-  keypoints: [String],
-  imageURL: [String],
-  videoURL: [String],
-});
-
-const Choice = mongoose.model('choice', {
-  title: String,
-  overview: [String],
-  description: [String],
-  keypoints: [String],
-  imageURL: [String],
-  videoURL: [String],
-});
 // Define schema for HTML courses
 const HTMLCourseSchema = new mongoose.Schema({
   title: String,
@@ -409,37 +373,6 @@ app.get('/api/blogs/:title', async (req, res) => {
   }
 });
 
-app.get('/api/:collection', async (req, res) => {
-  const collection = req.params.collection;
-  try {
-    let data;
-    switch (collection) {
-     
-      case 'tools':
-        data = await Tools.find().lean();
-        break;
-      case 'working':
-        data = await Working.find().lean();
-        break;
-
-         case 'careers':
-        data = await Careers.find().lean();
-        break;
-      case 'choice':
-        data = await Choice.find().lean();
-        break;
-     
-      default:
-        return res.status(404).json({ error: 'Collection not found' });
-    }
-    console.log('Data fetched successfully from', collection, 'collection:', data);
-    res.json(data);
-  } catch (error) {
-    console.error(`Error fetching data from ${collection} collection:`, error);
-    res.status(500).json({ error: `Error fetching data from ${collection} collection` });
-  }
-});
-
 // new api for courses based on category
 app.get('/api/courses/category/:category', async (req, res) => {
   try {
@@ -534,44 +467,6 @@ app.get('/api/courses/details/:id', async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
-app.get('/api/blogs/:collection/:title', async (req, res) => {
-  try {
-    const { collection, title } = req.params;
-    const decodedTitle = decodeURIComponent(title);
-
-    // Ensure the function is declared as async
-    const fetchContent = async () => {
-      try {
-        let content;
-        // Fetch content based on the provided title and collection
-        if (collection === 'careers') {
-          content = await Careers.findOne({ title: decodedTitle });
-        } else if (collection === 'tools') {
-          content = await Tools.findOne({ title: decodedTitle });
-        } else {
-          content = await Working.findOne({ title: decodedTitle });
-        }
-
-        if (content) {
-          const selectedContent = content.content.find(item => item.title === decodedTitle);
-          return res.json(selectedContent);
-        } else {
-          return res.status(404).json({ error: 'Content not found' });
-        }
-      } catch (error) {
-        console.error('Error fetching content:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-      }
-    };
-
-    // Call the asynchronous function
-    await fetchContent();
-  } catch (error) {
-    console.error('Error handling request:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
 
 
 
