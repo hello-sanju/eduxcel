@@ -154,30 +154,31 @@ router.post('/', async (req, res) => {
     // Log the user's location (latitude and longitude)
     console.log(`User Location: Latitude ${latitude}, Longitude ${longitude}`);
 
-    // Get the current time in IST
-        const currentTimeIST = moment().tz('Asia/Kolkata').format();
+        // Get the current time in IST
+    const currentTimeIST = moment().tz('Asia/Kolkata').format();
 
-    // Update user's profile with the new location and timestamp
-    await UserProfile.findOneAndUpdate(
-      { user: user._id },
-      {
-        $set: {
-          location: {
-            type: 'Point',
-        coordinates: [parseFloat(longitude), parseFloat(latitude)],
+    // Update user's profile with the new location and timestamp if coordinates are provided and valid
+    if (!isNaN(parseFloat(latitude)) && !isNaN(parseFloat(longitude))) {
+      await UserProfile.findOneAndUpdate(
+        { user: user._id },
+        {
+          $set: {
+            location: {
+              type: 'Point',
+              coordinates: [parseFloat(longitude), parseFloat(latitude)],
+            },
+            lastSignInAt: currentTimeIST, // Updated to use Indian Standard Time
+            ipAddress: req.userIpAddress,
           },
-          lastSignInAt: currentTimeIST, // Updated to use Indian Standard Time
-           ipAddress: req.userIpAddress,
         },
-      },
-      { new: true, upsert: true }
-    );
+        { new: true, upsert: true }
+      );
+    }
 
     // Sign a token as before
     const token = jwt.sign({ userId: user._id }, 'fRwD8ZcX#k5H*J!yN&2G@pQbS9v6E$tA');
-// Send a welcome email to the user
-await sendWelcomeEmail(email, user.username, latitude, longitude, currentTimeIST);
-
+    // Send a welcome email to the user
+    await sendWelcomeEmail(email, user.username, latitude, longitude, currentTimeIST);
 
     res.status(200).json({ token });
   } catch (error) {
