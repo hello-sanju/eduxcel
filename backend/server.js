@@ -353,54 +353,6 @@ app.get('/api/blogs/:title', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
-// new api for courses based on category
-app.get('/api/courses/category/:category', async (req, res) => {
-  try {
-    const category = req.params.category;
-    if (category === 'all') {
-      const course = await Course.find();
-      res.json(course);
-    } else {
-      const course = await Course.find({ category });
-      res.json(course);
-    }
-  } catch (error) {
-    console.error('Error fetching course:', error);
-    res.status(500).json({ error: 'Error fetching course' });
-  }
-});
-
-app.get('/api/courses/details/:id', async (req, res) => {
-  try {
-    const id = req.params.id;
-
-    console.log('Received request for project with ID:', id); // Log the ID received
-
-    // Check if the ID is a valid ObjectId
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      console.log('Invalid project ID:', id); // Log invalid ID
-      return res.status(400).json({ error: 'Invalid project ID' });
-    }
-
-    // Use findById to query the project by its ObjectId
-    const course = await Course.findById(id);
-
-    console.log('Project data retrieved:', course); // Log the project data retrieved
-
-    if (!course) {
-      console.log('Course not found'); // Log if project not found
-      return res.status(404).json({ error: 'Course not found' });
-    }
-
-    res.json(course);
-  } catch (error) {
-    console.error('Error fetching course details:', error);
-    res.status(500).json({ error: 'Error fetching course details' });
-  }
-});
-
-
   app.get('/api/:category', async (req, res) => {
     const { category } = req.params;
     try {
@@ -449,6 +401,24 @@ app.get('/api/courses/details/:id', async (req, res) => {
     }
   });
 
+
+
+// new api for courses based on category
+app.get('/api/courses/category/:category', async (req, res) => {
+  try {
+    const category = req.params.category;
+    if (category === 'all') {
+      const course = await Course.find();
+      res.json(course);
+    } else {
+      const course = await Course.find({ category });
+      res.json(course);
+    }
+  } catch (error) {
+    console.error('Error fetching course:', error);
+    res.status(500).json({ error: 'Error fetching course' });
+  }
+});
 
 // Add a new API endpoint to fetch random blog titles
 app.get('/api/random-blog-titles', async (req, res) => {
