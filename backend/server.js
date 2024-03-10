@@ -61,6 +61,23 @@ const Feedback = mongoose.model('feedback', {
   feedback: String,
 });
 const Query = mongoose.model('query', { name: String, email: String, query: String });
+
+const Tools = mongoose.model('tools', {
+  title: String,
+  overview: [String],
+  description: [String],
+  keypoints: [String],
+  imageURL: [String],
+  videoURL: [String],
+});
+const Working = mongoose.model('working', {
+  title: String,
+  overview: [String],
+  description: [String],
+  keypoints: [String],
+  imageURL: [String],
+  videoURL: [String],
+});
 // Define schema for HTML courses
 const HTMLCourseSchema = new mongoose.Schema({
   title: String,
