@@ -316,10 +316,32 @@ app.put('/api/profile', authMiddleware, async (req, res) => {
     res.status(500).json({ message: 'Error updating user profile' });
   }
 });
+
 // Serve profile images with caching disabled
 app.get('/uploads/:filename', (req, res) => {
   res.setHeader('Cache-Control', 'no-store'); // Disable caching
   res.sendFile(path.join(__dirname, 'uploads', req.params.filename));
+});
+
+
+// Add a new API endpoint to fetch random blog titles
+app.get('/api/random-blog-titles', async (req, res) => {
+  try {
+    // Fetch a random selection of 5 blog titles from the database
+    const randomToolsBlogs = await Tools.aggregate([{ $sample: { size: 4 } }]);
+    const randomWorkingBlogs = await Working.aggregate([{ $sample: { size: 1 } }]);
+
+    // Combine and shuffle the titles
+    const randomBlogTitles = [
+      ...randomToolsBlogs.map(blog => blog.title),
+      ...randomWorkingBlogs.map(blog => blog.title),
+    ].sort(() => Math.random() - 0.5).slice(0, 5);
+
+    res.json(randomBlogTitles);
+  } catch (error) {
+    console.error('Error fetching random blog titles:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 
@@ -436,27 +458,6 @@ app.get('/api/courses/category/:category', async (req, res) => {
     res.status(500).json({ error: 'Error fetching course' });
   }
 });
-
-// Add a new API endpoint to fetch random blog titles
-app.get('/api/random-blog-titles', async (req, res) => {
-  try {
-    // Fetch a random selection of 5 blog titles from the database
-    const randomToolsBlogs = await Tools.aggregate([{ $sample: { size: 4 } }]);
-    const randomWorkingBlogs = await Working.aggregate([{ $sample: { size: 1 } }]);
-
-    // Combine and shuffle the titles
-    const randomBlogTitles = [
-      ...randomToolsBlogs.map(blog => blog.title),
-      ...randomWorkingBlogs.map(blog => blog.title),
-    ].sort(() => Math.random() - 0.5).slice(0, 5);
-
-    res.json(randomBlogTitles);
-  } catch (error) {
-    console.error('Error fetching random blog titles:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
 
 
 
