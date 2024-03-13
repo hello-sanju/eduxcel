@@ -19,6 +19,7 @@ const UserProfile = require('./models/UserProfile'); // Import the UserProfile m
 const jwt = require('jsonwebtoken'); // Import the jsonwebtoken package
 const { verifyGoogleToken } = require('./middleware/authMiddleware');
 const cookieParser = require('cookie-parser');
+const mydb = mongoose.connection;
 
 dotenv.config();
 const app = express();
