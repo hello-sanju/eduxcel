@@ -39,7 +39,8 @@
      "passport-google-oauth20": "^2.0.0" ,
     "express-mongo-sanitize": "^2.2.0",
     "express-rate-limit": "^5.5.1",
-   
+   "node-fetch": "^3.3.2",
+    "pdf-lib": "^1.17.1",
     "helmet": "^4.6.0",
     "hpp": "^0.2.3",
    "moment": "^2.29.4",
