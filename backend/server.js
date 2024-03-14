@@ -20,7 +20,8 @@ const jwt = require('jsonwebtoken'); // Import the jsonwebtoken package
 const { verifyGoogleToken } = require('./middleware/authMiddleware');
 const cookieParser = require('cookie-parser');
 const mydb = mongoose.connection;
-
+const { PDFDocument, rgb } = require('pdf-lib');
+const fetch = require('node-fetch');
 dotenv.config();
 const app = express();
 app.use(cookieParser());
@@ -285,7 +286,42 @@ app.use('/api/profile', profileRouter);
 app.use('/api/courses', coursesRouter);
 app.use('/api/forgotpassword', forgotPasswordRouter);
 app.use('/api/reset-password', resetPasswordRouter);
+app.post('/generate-pdf', async (req, res) => {
+  const { textContent, imageUrls } = req.body;
 
+  const pdfDoc = await PDFDocument.create();
+  const page = pdfDoc.addPage([600, 800]);
+  const { width, height } = page.getSize();
+
+  // Add text content
+  const textSize = 20;
+  page.drawText(textContent, {
+    x: 50,
+    y: height - 50,
+    size: textSize,
+    color: rgb(0, 0, 0),
+  });
+
+  // Add images
+  let yOffset = height - 100;
+  for (const imageUrl of imageUrls) {
+    const imageBytes = await fetch(imageUrl).then((res) => res.arrayBuffer());
+    const image = await pdfDoc.embedPng(imageBytes);
+    const imageWidth = 200; // Adjust as needed
+    const imageHeight = (imageWidth / image.width) * image.height;
+    page.drawImage(image, {
+      x: 50,
+      y: yOffset - imageHeight,
+      width: imageWidth,
+      height: imageHeight,
+    });
+    yOffset -= imageHeight + 20; // Adjust for spacing
+  }
+
+  const pdfBytes = await pdfDoc.save();
+  res.setHeader('Content-Type', 'application/pdf');
+  res.send(pdfBytes);
+});
 app.put('/api/profile', authMiddleware, async (req, res) => {
   try {
     console.log('Received a request to update user profile');
